@@ -25,10 +25,6 @@ void main(){
   print('=====================');
   print('BANK SERBA ADA');
   print('=====================');
-  stdout.writeln('Masukkan PIN Anda : ');
-    // Command stdout.writeln untuk menampilkan teks yang bisa diketik.
-  var password = stdin.readLineSync();
-    // Variabel stdin.readLineSync() untuk membaca PIN yang diketik. Hasilnya bisa null, sehingga harus dicek dulu.
 
   // ========= LOGIN ========= //
     var percobaan = 0;
