@@ -9,6 +9,7 @@ void tampilMenu() {
     print('1. Cek Saldo');
     print('2. Setor Tunai');
     print('3. Tarik Tunai');
+    print('4. Keluar');
     print('=====================');
   }
 
@@ -107,80 +108,81 @@ void main(){
       }
 
       if (pilihMenu == '3') {
-        print('');
-        stdout.writeln('Jumlah yang ditarik : Rp');
-        var tarik = stdin.readLineSync();
-          // Variabel stdin.readLineSync() untuk membaca nominal penarikan yang diketik.
-          
-        try {
-          if (tarik == null || tarik.trim().isEmpty) {
-            print('Mohon masukkan nominal.');
-            return;
-          }
-            // Jika nominal null atau kosong, tampilkan notifikasi lalu program berhenti dengan return.
+        // Blok ini hanya berjalan jika pengguna memilih menu 3 (Tarik Tunai).
+        
+        stdout.write('Jumlah yang ditarik : Rp');
+          // stdout.write menampilkan teks tanpa pindah baris, jadi ketikan muncul di sampingnya.
 
-          int nominalTarik = int.parse(tarik.trim());
-            // Mengubah teks nominal penarikan menjadi angka.
+        int? nominalTarik = int.tryParse(stdin.readLineSync()?.trim() ?? '');
+          // Satu baris ini menjalankan 4 fungsi sekaligus, dari dalam ke luar:
+          // 1. stdin.readLineSync() membaca ketikan pengguna. Hasilnya String? (bisa null).
+          // 2. ?.trim() menghapus spasi di awal/akhir. Tanda ?. artinya trim() hanya dijalankan jika hasilnya tidak null.
+          // 3. ?? '' artinya jika hasil sebelumnya null, pakai teks kosong '' sebagai gantinya.
+          // 4. int.tryParse() mengubah teks menjadi angka. Jika gagal (huruf atau kosong), hasilnya null, bukan error.
+          // Tipe int? artinya variabel ini boleh berisi angka atau null.
 
-          if (nominalTarik % 50000 != 0) {
-            print('Mohon masukkan nominal dalam kelipatan Rp50.000.');
-            print('');
-            return;
-          }
-            // Operator % (modulus) menghitung sisa bagi. Jika sisa bagi dengan 50.000 tidak sama dengan 0, berarti bukan kelipatan Rp50.000 sehingga penarikan ditolak.
-          
-          saldo = saldo - nominalTarik;
-            // Saldo dikurangi sebesar nominal yang ditarik.
-          print('=====================');
-          print('Pilih Pecahan :');
-          print('1. Pecahan Rp50.000');
-          print('2. Pecahan Rp100.000');
-          print('=====================');
-          stdout.write('Pilih Pecahan (1/2) : ');
-            // Command stdout.write sama seperti writeln, tetapi tanpa pindah baris sehingga ketikan muncul di samping teks.
-          
-          var pilihPecahan = stdin.readLineSync();
-            // Variabel stdin.readLineSync() untuk membaca pilihan pecahan yang diketik.
+        if (nominalTarik == null || nominalTarik <= 0) {
+          print('Nominal harus berupa angka positif.');
+          continue;
+        }
+          // Validasi 1: tolak jika bukan angka (null), nol, atau negatif.
+          // continue = lewati sisa kode di dalam while, lalu kembali ke awal perulangan (menu tampil lagi).
+          // Berbeda dengan return yang mematikan seluruh program.
 
-          if(pilihPecahan == null || pilihPecahan.trim().isEmpty) {
-            print('Pilihan pecahan tidak boleh kosong.');
-            return;
-          }
-            // Jika pilihan pecahan null atau kosong, tampilkan notifikasi lalu program berhenti dengan return.
+        if (nominalTarik % 50000 != 0) {
+          print('Mohon masukkan nominal dalam kelipatan Rp50.000.');
+          continue;
+        }
+          // Validasi 2: operator % menghitung sisa bagi. Jika sisa dibagi 50.000 bukan 0, berarti bukan kelipatan Rp50.000.
+          // Contoh: 120.000 % 50.000 = 20.000 (ditolak), 150.000 % 50.000 = 0 (diterima).
 
-          int pilihanPecahan = int.parse(pilihPecahan.trim());
-            // Mengubah teks pilihan pecahan menjadi angka agar bisa dibandingkan di if.
-          print('=====================');
-          print('Hasil Penarikan :');
+        if (nominalTarik > saldo) {
+          print('Saldo tidak cukup.');
+          continue;
+        }
+          // Validasi 3: tolak jika nominal yang ditarik lebih besar dari saldo.
 
-          if (pilihanPecahan == 1) {
-            var lembarPecahan50 = nominalTarik ~/ 50000;
-            print('Rp50.000 x $lembarPecahan50 lembar');
-          }
-            // Jika memilih pecahan Rp50.000: operator ~/ (pembagian bulat) membagi nominal dengan 50.000 untuk mendapatkan jumlah lembar.
-          else if (pilihanPecahan == 2) {
-            var lembarPecahan100 = nominalTarik ~/ 100000;
-            var sisa = nominalTarik % 100000;
-              // lembarPecahan100 = jumlah lembar Rp100.000 (hasil bagi bulat). sisa = nominal yang tidak habis dibagi 100.000.
+        print('1. Pecahan Rp50.000');
+        print('2. Pecahan Rp100.000');
+        stdout.write('Pilih Pecahan (1/2) : ');
+          // Menampilkan pilihan pecahan uang yang diinginkan pengguna.
 
-            print('Rp100.000 x $lembarPecahan100 lembar.');
+        int? pilihanPecahan = int.tryParse(stdin.readLineSync()?.trim() ?? '');
+          // Sama seperti nominalTarik: baca ketikan, hapus spasi, ubah ke angka.
+          // Jika bukan angka, hasilnya null, yang nanti ditangani oleh else.
 
-            if (sisa > 0) {
-              var lembarSisa50 = sisa ~/ 50000;
-              print('Rp50.000 x $lembarSisa50 lembar.');
-            }
-              // Jika masih ada sisa (pasti Rp50.000 karena nominal kelipatan 50.000), sisa tersebut diberikan dalam 1 lembar Rp50.000.
-          }
-            // Jika memilih pecahan Rp100.000: uang dikeluarkan dalam lembar Rp100.000 dulu, sisanya dilengkapi Rp50.000.
-          else {
-            print('Pilihan pecahan tidak valid.');
-          }
-            // Jika pilihan pecahan selain 1 atau 2, tampilkan notifikasi tidak valid.
-          } catch (e) {
-            print('Nominal harus berupa angka');
-          }
-            // Blok catch menangkap error jika nominal atau pilihan pecahan yang diketik bukan angka.
+        if (pilihanPecahan == 1) {
+          print('Rp50.000 x ${nominalTarik ~/ 50000} lembar');
+          saldo -= nominalTarik;
+        }
+          // Jika memilih pecahan 1:
+          // ${...} adalah string interpolation untuk ekspresi (pakai kurung kurawal jika isinya perhitungan, bukan hanya nama variabel).
+          // ~/ adalah pembagian bulat tanpa koma. Contoh: 250.000 ~/ 50.000 = 5 lembar.
+          // saldo -= nominalTarik sama dengan saldo = saldo - nominalTarik (saldo dikurangi).
+
+        else if (pilihanPecahan == 2) {
+          print('Rp100.000 x ${nominalTarik ~/ 100000} lembar');
+          if (nominalTarik % 100000 > 0) print('Rp50.000 x 1 lembar');
+          saldo -= nominalTarik;
+        }
+          // Jika memilih pecahan 2:
+          // Baris 1: ~/ 100.000 menghitung jumlah lembar Rp100.000. Contoh: 250.000 ~/ 100.000 = 2 lembar.
+          // Baris 2: % 100.000 menghitung sisanya. Jika ada sisa (pasti Rp50.000 karena nominal kelipatan 50.000), tambah 1 lembar Rp50.000.
+          // Baris 3: saldo dikurangi.
+
+        else {
+          print('Pilihan pecahan tidak valid.');
+        }
+          // Jika pilihan pecahan bukan 1 atau 2 (termasuk null/huruf), tampilkan pesan tidak valid.
+          // Saldo tidak dikurangi karena baris saldo -= hanya ada di dalam if dan else if di atas.
+      }
+            // Kurung kurawal penutup: if menu 3, lalu while. Setelah itu program kembali ke atas (menampilkan menu lagi) selama ATM masih true.
+
+      if (pilihMenu == '4') {
+        print('Terima kasih telah menggunakan layanan kami.');
+        ATM = false;
+          // Jika memilih menu 4, tampilkan ucapan terima kasih dan ubah variabel ATM menjadi false sehingga perulangan while berhenti.
         }
       }
-        // Kurung kurawal penutup: if menu 3, lalu while. Setelah itu program kembali ke atas (menampilkan menu lagi) selama ATM masih true.
-    }
+      // Kurung kurawal penutup: if menu 4.
+}
