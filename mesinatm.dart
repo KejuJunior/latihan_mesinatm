@@ -31,34 +31,41 @@ void main(){
     // Variabel stdin.readLineSync() untuk membaca PIN yang diketik. Hasilnya bisa null, sehingga harus dicek dulu.
 
   // ========= LOGIN ========= //
-  if (password == null || password.trim().isEmpty) {
-    print('Mohon masukkan PIN.');
-    print('');
-    return;
-    }
-      // Jika PIN null atau kosong (setelah spasi dihapus oleh trim()), tampilkan notifikasi lalu program berhenti dengan return.
+    var percobaan = 0;
+      // Menghitung berapa kali PIN sudah dicoba.
 
-    try {
-      int passInt = int.parse(password.trim());
-        // Command int.parse untuk mengubah teks PIN menjadi angka. Jika berisi huruf, akan error dan ditangkap oleh catch.
+    while (!ATM && percobaan < 3) {
+      // Login berulang selama belum berhasil (ATM masih false) dan percobaan belum 3 kali.
+      stdout.write('Masukkan PIN Anda : ');
+      var password = stdin.readLineSync();
 
-      if(passInt != 112233) {
-        print('PIN salah.');
-        print('');
-        return;
+      if (password == null || password.trim().isEmpty) {
+        print('Mohon masukkan PIN.');
+        percobaan++;
+        continue;
+          // Sekarang continue valid karena berada di dalam while. Kembali ke awal login.
       }
-        // Jika PIN tidak sama dengan 112233, tampilkan "PIN salah" lalu program berhenti.
 
-      print('');
-      print('Selamat Datang');
+      int? passInt = int.tryParse(password.trim());
+        // tryParse dipakai supaya input huruf tidak error, hasilnya null.
 
-      ATM = true;
-        // Jika PIN benar, variabel ATM diubah menjadi true sehingga perulangan while di bawah bisa berjalan.
-
-    } catch (e) {
-      print('PIN harus berupa angka.');
+      if (passInt == 112233) {
+        print('');
+        print('Selamat Datang');
+        ATM = true;
+          // PIN benar, ATM menyala, perulangan login berhenti karena !ATM jadi false.
+      } else {
+        percobaan++;
+        print('PIN salah. Sisa percobaan : ${3 - percobaan}');
+        print('');
+      }
     }
-      // Blok catch menangkap error jika PIN yang diketik bukan angka. ATM tetap false sehingga menu tidak muncul.
+
+    if (!ATM) {
+      print('Percobaan habis. Kartu diblokir.');
+      return;
+        // Jika 3 kali gagal, ATM masih false, program berhenti dengan return.
+    }
 
     // ========= PROGRAM MESIN ATM ========= //
     while (ATM) {
